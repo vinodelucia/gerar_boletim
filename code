@@ -1,0 +1,68 @@
+import pandas as pd
+from PIL import Image, ImageDraw, ImageFont
+
+# Carregar a planilha
+planilha = pd.read_excel('C:\\Users\\Correção\\Documents\\FUVEST 2FASE\\NOTAS\\notas.xlsx')
+
+# Carregar a imagem de fundo
+imagem_fundo = Image.open('C:\\Users\\Correção\\Documents\\FUVEST 2FASE\\BOLETIM\\Bomletim.png')
+
+# Definir as posições para as informações do aluno e os títulos das colunas
+posicoes = {
+    'NOME': (30, 160, 180),
+    'UNIDADE': (30, 205, 225),
+    'TURMA': (30, 245, 265),
+    'RA': (30, 285, 305)
+}
+
+posicoes_notas = {
+    'Primeira Fase': (300, 280, 300),
+    'F1': (300, 330, 350),
+    'Linguagens (D1)': (300, 380, 400),
+    'Especificas': (300, 430, 450),
+    'D2': (300, 480, 500),
+    'NFC': (300, 530, 550),
+    'NFC FINAL': (300, 580, 600),
+    'Português': (490, 230, 250),
+    'Redação': (490, 280, 300),
+    'História': (490, 330, 350),
+    'Geografia': (490, 380, 400),
+    'Matemática': (490, 430, 450),
+    'Física': (490, 480, 500),
+    'Química': (490, 530, 550),
+    'Biologia': (490, 580, 600)
+}
+
+# Definir o tamanho e a fonte do texto
+tamanho_fonte = 18
+fonte = ImageFont.truetype('C:\\Windows\\Fonts\\arialbd.ttf', tamanho_fonte)
+
+# Função para adicionar texto à imagem
+def adicionar_texto(imagem, texto, posicao):
+    desenho = ImageDraw.Draw(imagem)
+    desenho.text(posicao[:2], texto, font=fonte, fill='black')
+
+# Função para gerar o boletim individual
+def gerar_boletim(aluno):
+    imagem_boletim = imagem_fundo.copy()
+
+    # Adicionar informações do aluno e títulos das colunas
+    for campo, posicao in posicoes.items():
+        valor = aluno[campo]
+        if pd.notnull(valor):
+            adicionar_texto(imagem_boletim, campo, posicao)
+            adicionar_texto(imagem_boletim, str(valor), (posicao[0], posicao[2]))
+
+    # Adicionar notas
+    for campo, posicao in posicoes_notas.items():
+        valor = aluno[campo]
+        if pd.notnull(valor) and valor != 0:
+            adicionar_texto(imagem_boletim, campo, posicao)
+            adicionar_texto(imagem_boletim, str(valor), (posicao[0], posicao[2]))
+
+    # Salvar boletim individual
+    imagem_boletim.save('C:\\Users\\Correção\\Documents\\FUVEST 2FASE\\RESULTADOS\\boletim_{}.png'.format(aluno['RA']))
+
+# Gerar boletins individuais para cada aluno
+for _, aluno in planilha.iterrows():
+    gerar_boletim(aluno)
